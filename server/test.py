@@ -1,7 +1,7 @@
-# Extracted from https://medium.com/viithiisys/creating-and-verifying-one-time-passwords-with-django-otp-861f472f602f
 
 from django_otp.oath import TOTP
 from django_otp.util import random_hex
+from unittest import mock
 import time
 
 
@@ -10,7 +10,7 @@ class TOTPVerification:
     def __init__(self, key=random_hex(20)):
         # secret key that will be used to generate a token,
         # User can provide a custom value to the key.
-        self.key = bytes(key, 'utf-8')
+        self.key = bytes(random_hex(20), 'utf-8')
         # counter with which last token was verified.
         # Next token must be generated at a higher counter value.
         self.last_verified_counter = -1
@@ -20,7 +20,7 @@ class TOTPVerification:
         # number of digits in a token. Default is 6
         self.number_of_digits = 6
         # validity period of a token. Default is 30 second.
-        self.token_validity_period = 30
+        self.token_validity_period = 35
 
     def totp_obj(self):
         # create a TOTP object
@@ -61,3 +61,27 @@ class TOTPVerification:
                 # was less than last verified counter, then return False
                 self.verified = False
         return self.verified
+
+from time import sleep
+if __name__ == '__main__':
+    # verify token the normal way
+    phone1 = TOTPVerification(key='816d960364718cd36b1f79d3447fd07dc27023d8')
+    generated_token = phone1.generate_token()
+    print("Generated token is: ", generated_token)
+    # verify token by passing along the token validity period.
+    """"
+    with mock.patch('time.time', return_value=1497657600):
+        print("Current Time is: ", time.time())
+        generated_token = phone1.generate_token()
+        print(generated_token)
+    with mock.patch(
+        'time.time',
+            return_value=1497657600 + phone1.token_validity_period):
+        print("Checking time after the token validity period has passed."
+              " Current Time is: ", time.time())
+        token = int(input("Enter token: "))
+        print(phone1.verify_token(token, tolerance=1))"""
+    for i in range(10):
+        sleep(30)
+        generated_token = phone1.generate_token()
+        print("Generated token is: ", generated_token)
