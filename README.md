@@ -16,6 +16,13 @@ Instalar las dependencias con el comando:
 
 `npm install`
 
+Acceder a la carpeta del servidor:
+
+`cd server`
+
+Instalar las librerías de Python
+
+`pip install -r requirements.txt`
 
 ## Ejecución
 Para ejecutar el servidor de Django:
