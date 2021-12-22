@@ -1,12 +1,13 @@
 from django.http import HttpResponse
 from .models import TOTP, TOTPLog
 from .utils import tokens
-from .serializers import TOTPSerializer, TOTPLogSerializer
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from time import sleep
 import time
+from django_otp.util import random_hex
 from django_otp.oath import totp
+from base64 import b32encode
 
 def index(request):
     return HttpResponse("API index")
@@ -15,10 +16,10 @@ def index(request):
 @csrf_exempt 
 def generate(request, userId):
     if request.method == 'POST':
-        token_obj = tokens.TOTPVerification()
+        token_obj = tokens.TOTPVerification(random_hex(20))
         totp_obj = TOTP.objects.create(secret=token_obj.key, userId=userId)
         print("Generated key {} for user {}".format(totp_obj.secret, str(userId)))
-        return HttpResponse("{secret: "+ str(totp_obj.secret) +"}")
+        return HttpResponse(b32encode(totp_obj.secret))
     else:
         return HttpResponse("Request method not valid")
 
